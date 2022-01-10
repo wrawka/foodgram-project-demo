@@ -26,7 +26,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
+    'rest_framework.authtoken',
     'djoser',
+
+    'api',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -98,3 +102,28 @@ MEDIA_ROOT = BASE_DIR.joinpath('media/')
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+}
+
+DJOSER = {
+    'PERMISSIONS': {
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
+    'SERIALIZERS': {
+        'current_user': 'users.serializers.FoodgramUserSerializer',
+        'user': 'users.serializers.FoodgramUserSerializer',
+        'user_create': 'users.serializers.FoodgramUserSerializer',
+        'user_list': 'users.serializers.FoodgramUserSerializer',
+    },
+    'HIDE_USERS': False,
+}

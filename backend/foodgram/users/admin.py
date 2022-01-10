@@ -1,3 +1,8 @@
 from django.contrib import admin
+from django.db.models import fields
+from .models import Follow
 
-# Register your models here.
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    fields = (('user', 'following'),)
