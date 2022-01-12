@@ -1,0 +1,27 @@
+POST http://localhost:8000/api/users/ HTTP/1.1
+content-type: application/json
+Authorization: Token 753e6ff8c806d406d34797ba06e1a87730ff1b30
+
+{
+    "first_name": "ass",
+    "last_name": "tits",
+    "password": "alpine12",
+    "email": "aaa@1aa.aa",
+    "username": "djoser6"
+}
+###
+POST http://127.0.0.1:8000/api/token/login/ HTTP/1.1
+content-type: application/json
+
+{
+    "password": "alpine12",
+    "username": "djoser1"
+}
+###
+POST http://localhost:8000/api/users/3/subscribe/ HTTP/1.1
+content-type: application/json
+Authorization: Token 753e6ff8c806d406d34797ba06e1a87730ff1b30
+###
+GET http://localhost:8000/api/users/me/ HTTP/1.1
+content-type: application/json
+Authorization: Token 753e6ff8c806d406d34797ba06e1a87730ff1b30
