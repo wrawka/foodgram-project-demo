@@ -112,19 +112,21 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10,
+    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    # 'PAGE_SIZE': 10,
 }
 
 DJOSER = {
     'PERMISSIONS': {
         'user_list': ['rest_framework.permissions.AllowAny'],
+        'user': ['rest_framework.permissions.IsAuthenticatedOrReadOnly'],
     },
     'SERIALIZERS': {
         'current_user': 'users.serializers.FoodgramUserSerializer',
         'user': 'users.serializers.FoodgramUserSerializer',
-        'user_create': 'users.serializers.FoodgramUserSerializer',
+        'user_create': 'users.serializers.FoodgramUserCreateSerializer',
         'user_list': 'users.serializers.FoodgramUserSerializer',
     },
+    'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
 }
