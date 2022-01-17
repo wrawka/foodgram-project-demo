@@ -1,9 +1,35 @@
+from email.policy import default
+from enum import unique
 from django.contrib.auth import get_user_model
-from rest_framework import serializers, validators
+from djoser.serializers import UserCreateSerializer
+from rest_framework import serializers, validators, permissions
 from .models import Follow
 
 
 User = get_user_model()
+
+
+class FoodgramUserCreateSerializer(UserCreateSerializer):
+    email = serializers.EmailField(
+        validators = [
+            validators.UniqueValidator(
+                queryset=User.objects.all(),
+                message='Пользователь с таким email уже зарегистрирован.'
+            )
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'password', 'first_name', 'last_name'
+        )
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': True},
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+        }
 
 
 class FoodgramUserSerializer(serializers.ModelSerializer):
@@ -13,46 +39,38 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             'email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed'
-            )
-        extra_kwargs = {
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-        }
+        )
 
     def get_is_subscribed(self, following):
-        user = None
+        result = False
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             user = request.user
-        result = user.is_authenticated
+            result = user.is_authenticated
         if result:
             result = Follow.objects.filter(user=user, following=following).exists()
         return result
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
+class UserWithRecipesSerializer(FoodgramUserSerializer):
+    recipes = ...
+    recipes_count = ...
+
+
+class FollowSerializer(serializers.Serializer):
+    user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
-    following = serializers.SlugRelatedField(
-        slug_field='username',
-        queryset=User.objects.all(),
-        default=None
-    )
-
-    class Meta:
-        model = Follow
-        fields = '__all__'
-        validators = [
-            validators.UniqueTogetherValidator(
-                queryset=Follow.objects.all(),
-                fields=('user', 'following')
-            )
-        ]
 
     def validate(self, attrs):
-        if self.context['request'].user.id == int(self._context['view'].kwargs['pk']):
+        user = attrs['user']
+        following = attrs['following']
+        if Follow.objects.filter(user=user, following=following).exists():
+            raise serializers.ValidationError('Already subscribed to this user.')
+        if user == following:
             raise serializers.ValidationError('Can\'t follow self.')
         return super().validate(attrs)
+
+    def to_representation(self, instance):
+        context = {'request': self.context.get('request')}
+        return FoodgramUserSerializer(instance=instance.following, context=context)
