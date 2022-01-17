@@ -1,20 +1,25 @@
-GET http://localhost:8000/api/recipes/ HTTP/1.1
+POST http://localhost:8000/api/users/ HTTP/1.1
 content-type: application/json
 
 {
+    "username": "buttface",
+    "first_name": "butt",
+    "last_name": "face",
+    "email": "butt@face.me",
+    "password": "asstits01"
 }
 ###
 POST http://127.0.0.1:8000/api/auth/token/login/ HTTP/1.1
 content-type: application/json
 
 {
-    "password": "alpine12",
-    "email": "aaa@3aa.aa"
+    "password": "asstits01",
+    "email": "butt@face.me"
 }
 ###
 POST http://localhost:8000/api/recipes/ HTTP/1.1
 content-type: application/json
-Authorization: Token 5d421368a0c3210c864329e6d8e7ec8044983edd
+Authorization: Token 6d1a57a2ea37dc371ea1c57d185eebb89d6dc3ea
 
 {
     "ingredients": [
