@@ -60,3 +60,8 @@ class RecipeIngredient(models.Model):
                 name='ingredient_unique_in_recipe'
             ),
         ]
+
+
+class ShoppingCart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ManyToManyField(Recipe)

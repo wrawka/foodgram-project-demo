@@ -19,7 +19,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all(), source='ingredient')
     amount = serializers.IntegerField()
     name = serializers.ReadOnlyField(source='ingredient.name')
     measurement_unit = serializers.ReadOnlyField(source='ingredient.measurement_unit')
@@ -27,6 +27,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeIngredient
         fields = ['id', 'name', 'measurement_unit','amount']
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)
     
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -49,7 +52,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             RecipeIngredient.objects.create(
                 recipe=recipe,
-                ingredient=ingredient['id'],
+                ingredient=ingredient['ingredient'],
                 amount=ingredient['amount']
         )
         return recipe
+
+    def to_representation(self, instance):
+        return super().to_representation(instance)
