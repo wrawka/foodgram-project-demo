@@ -19,27 +19,31 @@ content-type: application/json
 ###
 POST http://localhost:8000/api/recipes/ HTTP/1.1
 content-type: application/json
-Authorization: Token 6d1a57a2ea37dc371ea1c57d185eebb89d6dc3ea
+Authorization: Token 903a40028fe64b4568403b2e425d569d3a2e4b6a
 
 {
     "ingredients": [
         {
             "id": 1,
             "amount": 10
+        },
+        {
+            "id": 2,
+            "amount": 100
         }
     ],
     "tags": [
         1,
         2
     ],
-    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-    "name": "string",
-    "text": "string",
-    "cooking_time": 1
+    "image": "image_placeholder",
+    "name": "test_recipe_name",
+    "text": "test_recipe_text",
+    "cooking_time": 99
 }
 ###
-GET http://localhost:8000/api/tags/1/ HTTP/1.1
+GET http://localhost:8000/api/recipes/3/ HTTP/1.1
 content-type: application/json
 ###
-GET http://localhost:8000/api/ingredients/15/ HTTP/1.1
+GET http://localhost:8000/api/ingredients/ HTTP/1.1
 content-type: application/json

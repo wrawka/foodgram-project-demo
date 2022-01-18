@@ -22,6 +22,7 @@ class RecipesViewSet(ModelViewSet):
     @action(detail=True, name="Add to shopping cart", methods=['POST'])
     def shopping_cart(self, request, pk=None):
         """ Add recipe to the shopping cart. """
+        pass
         
 
     @shopping_cart.mapping.delete
