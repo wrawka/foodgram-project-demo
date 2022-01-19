@@ -1,5 +1,3 @@
-from operator import mod
-from wsgiref.validate import validator
 from django.db import models
 from django.core.validators import MinValueValidator
 
@@ -50,28 +48,28 @@ class Recipe(models.Model):
         return self.name
 
 
-class MeasuredIngredient(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[MinValueValidator(1)])
-
-    # class Meta:
-    #     constraints = [
-    #         models.UniqueConstraint(
-    #             fields=['recipe', 'ingredient'],
-    #             name='ingredient_unique_in_recipe'
-    #         ),
-    #     ]
-    def __str__(self) -> str:
-        return f'{self.ingredient.name} - {self.amount} {self.ingredient.measurement_unit}'
-
-
 class RecipeIngredients(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.DO_NOTHING)
     amount = models.IntegerField(validators=[MinValueValidator(1)])
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='ingredient_unique_in_recipe'
+            ),
+        ]
+
+    # def __str__(self) -> str:
+    #     return f'{self.ingredient.name} - {self.amount} {self.ingredient.measurement_unit}'
 
 
 class ShoppingCart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipes = models.ManyToManyField(Recipe)
+
+
+class Favourites(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     recipes = models.ManyToManyField(Recipe)
