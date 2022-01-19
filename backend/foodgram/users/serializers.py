@@ -61,6 +61,11 @@ class FollowSerializer(serializers.Serializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
+    following = serializers.SlugRelatedField(
+        slug_field='username',
+        queryset=User.objects.all(),
+        default=None
+    )
 
     def validate(self, attrs):
         user = attrs['user']

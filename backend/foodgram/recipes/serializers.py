@@ -1,5 +1,7 @@
 from users.serializers import FoodgramUserSerializer
-from rest_framework import serializers
+from rest_framework import serializers, validators
+from django.db import models
+
 
 from .models import RecipeIngredients, Tag, Ingredient, Recipe
 
@@ -9,9 +11,6 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = '__all__'
-
-    def to_representation(self, instance):
-        return super().to_representation(instance)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -32,6 +31,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'measurement_unit','amount']
 
     def to_representation(self, instance):
+        """ Swapping queryset from Ingredient to RecipeIngredient. """
         recipe_ingredient = instance.recipeingredients_set.all().first()
         return super().to_representation(recipe_ingredient)
 
@@ -45,8 +45,15 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = '__all__'
+        # validators = [
+        #     validators.UniqueValidator(
+        #         queryset=RecipeIngredients.objects.filter(),
+        #         fields=['recipe', 'ingredient']
+        #     )
+        # ]
 
     def create(self, validated_data):
+        """ Custom create method to handle nested tags and ingredients. """
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
@@ -59,8 +66,24 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
         return recipe
 
-    def to_representation(self, instance):
-        tags_ser = TagSerializer(self.instance.tags.all(), many=True)
-        rep = super().to_representation(instance)
+    def update(self, recipe, validated_data):
+        """ Custom update method by overwriting tags and ingredients. """
+        ingredients = validated_data.pop('ingredients')
+        tags = validated_data.pop('tags')
+        recipe.tags.set(tags)
+        recipe.recipeingredients_set.all().delete()
+        for ingredient in ingredients:
+            RecipeIngredients.objects.create(
+                recipe=recipe,
+                ingredient=ingredient['ingredient']['id'],
+                amount=ingredient['amount']
+        )
+        return super().update(recipe, validated_data)
+
+    def to_representation(self, data):
+        """ Serializing tags manually. """
+        iterable = data.all() if isinstance(data, models.Manager) else data
+        tags_ser = TagSerializer(iterable.tags.all(), many=True)
+        rep = super().to_representation(iterable)
         rep['tags'] = tags_ser.data
         return rep

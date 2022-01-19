@@ -1,10 +1,10 @@
 from django.urls import include, path
-from users.views import Subscribe
+from users.views import FollowViewSet
 from rest_framework.routers import DefaultRouter
 from recipes.views import TagsViewSet, IngredientsViewSet, RecipesViewSet
 
 router = DefaultRouter()
-# router.register(r'users', Subscribe.as_view(), basename='following')
+router.register(r'users', FollowViewSet, basename='following')
 router.register(r'tags', TagsViewSet)
 router.register(r'ingredients', IngredientsViewSet)
 router.register(r'recipes', RecipesViewSet)
