@@ -1,6 +1,8 @@
 from email.policy import default
 from enum import unique
 from django.contrib.auth import get_user_model
+# from recipes.serializers import RecipeSerializer
+import recipes.serializers
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers, validators, permissions
 from .models import Follow
@@ -52,20 +54,14 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
         return result
 
 
-class UserWithRecipesSerializer(FoodgramUserSerializer):
-    recipes = ...
-    recipes_count = ...
-
-
-class FollowSerializer(serializers.Serializer):
+class FollowSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
-    following = serializers.SlugRelatedField(
-        slug_field='username',
-        queryset=User.objects.all(),
-        default=None
-    )
+
+    class Meta:
+        model = Follow
+        fields = '__all__'
 
     def validate(self, attrs):
         user = attrs['user']
@@ -78,4 +74,5 @@ class FollowSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         context = {'request': self.context.get('request')}
-        return FoodgramUserSerializer(instance=instance.following, context=context)
+        # ret = FoodgramUserSerializer(instance=instance.following).data
+        return UserWithRecipesSerializer(instance=instance.following, context=context).data
