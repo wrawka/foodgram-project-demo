@@ -6,9 +6,11 @@ from .models import Ingredient, Recipe, Tag
 class IngredientAdmin(admin.ModelAdmin):
     pass
 
+
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     pass
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
