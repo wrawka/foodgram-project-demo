@@ -1,8 +1,5 @@
-from email.policy import default
-from enum import unique
 from django.contrib.auth import get_user_model
-# from recipes.serializers import RecipeSerializer
-import recipes.serializers
+from recipes.serializers.nested import RecipeLiteSerializer, Recipe
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers, validators, permissions
 from .models import Follow
@@ -43,36 +40,46 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
             'email', 'id', 'username', 'first_name', 'last_name', 'is_subscribed'
         )
 
-    def get_is_subscribed(self, following):
+    def get_is_subscribed(self, author):
         result = False
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             user = request.user
             result = user.is_authenticated
         if result:
-            result = Follow.objects.filter(user=user, following=following).exists()
+            result = Follow.objects.filter(user=user, author=author).exists()
         return result
 
 
-class FollowSerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
+class SubscriptionUserSerializer(FoodgramUserSerializer):
+    recipes = serializers.SerializerMethodField()
+    recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Follow
-        fields = '__all__'
+        model = User
+        fields = FoodgramUserSerializer.Meta.fields + ('recipes', 'recipes_count')
 
-    def validate(self, attrs):
-        user = attrs['user']
-        following = attrs['following']
-        if Follow.objects.filter(user=user, following=following).exists():
-            raise serializers.ValidationError('Already subscribed to this user.')
-        if user == following:
-            raise serializers.ValidationError('Can\'t follow self.')
-        return super().validate(attrs)
+    def get_recipes_count(self, user):
+        return user.recipes.count()
 
-    def to_representation(self, instance):
-        context = {'request': self.context.get('request')}
-        # ret = FoodgramUserSerializer(instance=instance.following).data
-        return UserWithRecipesSerializer(instance=instance.following, context=context).data
+    def get_recipes(self, user):
+        queryset = Recipe.objects.filter(author=user)
+        limit = queryset.count()
+        request = self.context.get('request')
+        if request:
+            limit = int(request.query_params.get('recipes_limit', limit))
+        return RecipeLiteSerializer(queryset[:limit], many=True).data
+
+    # def validate(self, attrs):
+    #     user = attrs['user']
+    #     author = attrs['author']
+    #     if Follow.objects.filter(user=user, author=author).exists():
+    #         raise serializers.ValidationError('Already subscribed to this user.')
+    #     if user == author:
+    #         raise serializers.ValidationError('Can\'t follow self.')
+    #     return super().validate(attrs)
+
+    # def to_representation(self, instance):
+    #     context = {'request': self.context.get('request')}
+    #     # ret = FoodgramUserSerializer(instance=instance.author).data
+    #     return UserWithRecipesSerializer(instance=instance.author, context=context).data

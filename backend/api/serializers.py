@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from users.serializers import FoodgramUserSerializer
-from recipes.serializers import RecipeSerializer
+from recipes.serializers.base import RecipeSerializer
 
 
 class UserWithRecipesSerializer(FoodgramUserSerializer):

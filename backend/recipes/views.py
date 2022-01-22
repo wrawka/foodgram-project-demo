@@ -2,7 +2,7 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from rest_framework.permissions import AllowAny
 from .models import Tag, Ingredient, Recipe
-from .serializers import TagSerializer, IngredientSerializer, RecipeSerializer
+from .serializers.base import TagSerializer, IngredientSerializer, RecipeSerializer
 
 
 class TagsViewSet(ReadOnlyModelViewSet):

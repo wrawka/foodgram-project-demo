@@ -1,9 +1,9 @@
-import users.serializers
 from rest_framework import serializers, validators
 from django.db import models
 
 
-from .models import RecipeIngredients, Tag, Ingredient, Recipe
+from recipes.models import RecipeIngredients, Tag, Ingredient, Recipe
+from users.serializers import FoodgramUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -37,7 +37,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    author = users.serializers.FoodgramUserSerializer(
+    author = FoodgramUserSerializer(
         default=serializers.CurrentUserDefault()
     )
     ingredients = RecipeIngredientSerializer(many=True)
