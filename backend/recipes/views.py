@@ -1,8 +1,19 @@
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import pagination, permissions, status
 from rest_framework.decorators import action
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
-from rest_framework.permissions import AllowAny
-from .models import Tag, Ingredient, Recipe
-from .serializers.base import TagSerializer, IngredientSerializer, RecipeSerializer
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+
+from django.shortcuts import get_object_or_404
+
+from .filters import IngredientSearchFilter, RecipeFilter
+from .models import Favourites, Ingredient, Recipe, ShoppingCart, Tag
+from .serializers.base import (
+    IngredientSerializer,
+    RecipeSerializer,
+    TagSerializer,
+)
+from .serializers.nested import RecipeLiteSerializer
 
 
 class TagsViewSet(ReadOnlyModelViewSet):
@@ -13,20 +24,72 @@ class TagsViewSet(ReadOnlyModelViewSet):
 class IngredientsViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = IngredientSearchFilter
 
 
 class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
+    pagination_class = pagination.LimitOffsetPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
-    @action(detail=True, name="Add to shopping cart", methods=['POST'])
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    @action(detail=True, name="Add to shopping cart")
     def shopping_cart(self, request, pk=None):
-        """ Add recipe to the shopping cart. """
-        
-        pass
-        
+        """ Adds a recipe to the shopping cart. """
+        cart, _ = ShoppingCart.objects.get_or_create(user=request.user)
+        recipe = get_object_or_404(Recipe, id=pk)
+        if recipe in cart.recipes.all():
+            return Response(
+                {'errors': 'Already in the shopping cart.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        cart.recipes.add(recipe)
+        return Response(RecipeLiteSerializer(recipe).data)
 
     @shopping_cart.mapping.delete
-    def remove_shopping_cart(self, request, pk=None):
-        """ Remove recipe from the shopping cart. """
-        pass
+    def remove_from_shopping_cart(self, request, pk=None):
+        """ Removes a recipe from the shopping cart. """
+        recipe = get_object_or_404(Recipe, id=pk)
+        cart = get_object_or_404(ShoppingCart, user=request.user)
+        if recipe not in cart.recipes.all():
+            return Response(
+                {'errors': 'Not in the shopping cart.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        cart.recipes.remove(recipe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, name="Add to favourites")
+    def favourite(self, request, pk=None):
+        """ Adds a recipe to favourites. """
+        favourites, _ = Favourites.objects.get_or_create(user=request.user)
+        recipe = get_object_or_404(Recipe, id=pk)
+        if recipe in favourites.recipes.all():
+            return Response(
+                {'errors': 'Already in favourites.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        favourites.recipes.add(recipe)
+        return Response(RecipeLiteSerializer(recipe).data)
+
+    @favourite.mapping.delete
+    def remove_from_favourites(self, request, pk=None):
+        """ Removes a recipe from favourites. """
+        recipe = get_object_or_404(Recipe, id=pk)
+        favourites = get_object_or_404(Favourites, user=request.user)
+        if recipe not in favourites.recipes.all():
+            return Response(
+                {'errors': 'Not in favourites.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        favourites.recipes.remove(recipe)
+        return Response(status=status.HTTP_204_NO_CONTENT)
