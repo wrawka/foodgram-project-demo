@@ -16,7 +16,7 @@ class Follow(models.Model):
         verbose_name_plural = 'Подписки'
         constraints = [
             models.CheckConstraint(
-                check=~models.Q(following=models.F('user')),
+                check=~models.Q(author=models.F('user')),
                 name='self_following_disallowed'
             ),
             models.UniqueConstraint(
