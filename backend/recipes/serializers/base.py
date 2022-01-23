@@ -39,17 +39,14 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredients
         fields = ['id', 'name', 'measurement_unit', 'amount']
 
-    def to_representation(self, instance):
-        """ Swapping queryset from Ingredient to RecipeIngredient. """
-        recipe_ingredient = instance.recipeingredients_set.all().first()
-        return super().to_representation(recipe_ingredient)
-
 
 class RecipeSerializer(serializers.ModelSerializer):
     author = FoodgramUserSerializer(
         default=serializers.CurrentUserDefault()
     )
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True, source='recipeingredients_set'
+    )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
@@ -63,7 +60,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """ Custom create method to handle nested tags and ingredients. """
-        ingredients = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('recipeingredients_set')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
@@ -77,7 +74,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, recipe, validated_data):
         """ Custom update method by overwriting tags and ingredients. """
-        ingredients = validated_data.pop('ingredients')
+        ingredients = validated_data.pop('recipeingredients_set')
         tags = validated_data.pop('tags')
         recipe.tags.set(tags)
         recipe.recipeingredients_set.all().delete()
@@ -92,16 +89,16 @@ class RecipeSerializer(serializers.ModelSerializer):
     def to_representation(self, data):
         """ Serializing tags manually. """
         iterable = data.all() if isinstance(data, models.Manager) else data
-        tags_ser = TagSerializer(iterable.tags.all(), many=True)
+        tags = TagSerializer(iterable.tags.all(), many=True).data
         rep = super().to_representation(iterable)
-        rep['tags'] = tags_ser.data
+        rep['tags'] = tags
         return rep
 
     def get_is_favorited(self, recipe):
         user = self.get_user()
         if user.is_authenticated:
             try:
-                favourites = user.favourites_set.get().recipes.all()
+                favourites = user.favourites.recipes.all()
                 return recipe in favourites
             except Favourites.DoesNotExist:
                 pass
@@ -111,7 +108,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.get_user()
         if user.is_authenticated:
             try:
-                shopping_cart = user.shoppingcart_set.get().recipes.all()
+                shopping_cart = user.shoppingcart.recipes.all()
                 return recipe in shopping_cart
             except ShoppingCart.DoesNotExist:
                 pass

@@ -5,6 +5,7 @@ from users.models import User
 
 
 class Tag(models.Model):
+    """ Tag to specialize recipe. """
     name = models.CharField(max_length=200, unique=True)
     color = models.CharField(max_length=7, unique=True)
     slug = models.SlugField(unique=True)
@@ -18,6 +19,7 @@ class Tag(models.Model):
 
 
 class Ingredient(models.Model):
+    """ Ingredient to put in the recipe. """
     name = models.CharField(max_length=200)
     measurement_unit = models.CharField(max_length=200)
 
@@ -55,6 +57,7 @@ class Recipe(models.Model):
 
 
 class RecipeIngredients(models.Model):
+    """ Representation of ingredient in the recipe (with amount). """
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.DO_NOTHING)
     amount = models.PositiveIntegerField(validators=[MinValueValidator(1)])
@@ -73,10 +76,10 @@ class RecipeIngredients(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     recipes = models.ManyToManyField(Recipe)
 
 
 class Favourites(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     recipes = models.ManyToManyField(Recipe)

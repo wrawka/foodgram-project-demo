@@ -42,27 +42,25 @@ class RecipeFilter(df.FilterSet):
         fields = ('author',)
 
     def get_is_favorited(self, queryset, name, value):
-        if not value:
-            return queryset
         user = self.request.user
+        if not value or not user.is_authenticated:
+            return queryset
         try:
-            favourites = user.favourites_set.first()
-            recipes = favourites.recipes.all()
+            favorite_recipes = user.favourites.recipes.all()
         except Favourites.DoesNotExist:
             return queryset
         return queryset.filter(
-            pk__in=(recipe.pk for recipe in recipes)
+            pk__in=(recipe.pk for recipe in favorite_recipes)
         )
 
     def get_is_in_shopping_cart(self, queryset, name, value):
-        if not value:
-            return queryset
         user = self.request.user
+        if not value or not user.is_authenticated:
+            return queryset
         try:
-            shopping_cart = user.shoppingcart_set.first()
-            recipes = shopping_cart.recipes.all()
+            shopping_cart = user.shoppingcart.recipes.all()
         except ShoppingCart.DoesNotExist:
             return queryset
         return queryset.filter(
-            pk__in=(recipe.pk for recipe in recipes)
+            pk__in=(recipe.pk for recipe in shopping_cart)
         )

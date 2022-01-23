@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from django.db.models import Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from .filters import IngredientSearchFilter, RecipeFilter
@@ -69,7 +71,7 @@ class RecipesViewSet(ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, name="Add to favourites")
-    def favourite(self, request, pk=None):
+    def favorite(self, request, pk=None):
         """ Adds a recipe to favourites. """
         favourites, _ = Favourites.objects.get_or_create(user=request.user)
         recipe = get_object_or_404(Recipe, id=pk)
@@ -81,7 +83,7 @@ class RecipesViewSet(ModelViewSet):
         favourites.recipes.add(recipe)
         return Response(RecipeLiteSerializer(recipe).data)
 
-    @favourite.mapping.delete
+    @favorite.mapping.delete
     def remove_from_favourites(self, request, pk=None):
         """ Removes a recipe from favourites. """
         recipe = get_object_or_404(Recipe, id=pk)
@@ -93,3 +95,29 @@ class RecipesViewSet(ModelViewSet):
             )
         favourites.recipes.remove(recipe)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False)
+    def download_shopping_cart(self, request, *args, **kwargs):
+        """ Returns the shopping cart aggregated contents as a file. """
+        recipes = (
+            request.user.shoppingcart.recipes.prefetch_related('ingredients')
+        )
+        ingredients = (
+            recipes.order_by('ingredients__name')
+            .values('ingredients__name', 'ingredients__measurement_unit')
+            .annotate(total=Sum('recipeingredients__amount'))
+        )
+        ingredients_list = ''
+        for ingredient in ingredients:
+            ingredients_list += (
+                f'{ingredient.get("ingredients__name")}'
+                f' — {ingredient.get("total")}'
+                f' {ingredient.get("ingredients__measurement_unit")}.\r\n'
+            )
+        response = HttpResponse(
+            ingredients_list, content_type='text/plain,charset=utf8'
+        )
+        response['Content-Disposition'] = (
+            f'attachment; filename={"shopping_list.txt"}'
+        )
+        return response
