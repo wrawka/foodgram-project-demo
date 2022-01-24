@@ -1,8 +1,7 @@
 import django_filters.rest_framework as df
+from recipes.models import Favourites, ShoppingCart
 
 from django.db.models import IntegerField, Value
-
-from recipes.models import Favourites, ShoppingCart
 
 from .models import Ingredient, Recipe
 

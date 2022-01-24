@@ -1,7 +1,10 @@
-from django.urls import include, path
-from users.views import FollowViewSet
+from recipes.views import IngredientsViewSet, RecipesViewSet, TagsViewSet
 from rest_framework.routers import DefaultRouter
-from recipes.views import TagsViewSet, IngredientsViewSet, RecipesViewSet
+
+from django.urls import include, path
+
+from users.views import FollowViewSet
+
 
 router = DefaultRouter()
 router.register(r'users', FollowViewSet, basename='following')

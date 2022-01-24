@@ -1,11 +1,15 @@
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (
+    Favourites,
+    Ingredient,
+    Recipe,
+    RecipeIngredients,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework import serializers
 
 from django.db import models
-
-from recipes.models import (
-    Favourites, Ingredient, Recipe, RecipeIngredients, ShoppingCart, Tag
-)
 
 from users.serializers import FoodgramUserSerializer
 

@@ -1,9 +1,8 @@
 from djoser.serializers import UserCreateSerializer
+from recipes.serializers.nested import Recipe, RecipeLiteSerializer
 from rest_framework import serializers, validators
 
 from django.contrib.auth import get_user_model
-
-from recipes.serializers.nested import Recipe, RecipeLiteSerializer
 
 from .models import Follow
 
