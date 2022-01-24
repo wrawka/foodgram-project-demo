@@ -44,7 +44,7 @@ class RecipesViewSet(ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    @action(detail=True, name="Add to shopping cart")
+    @action(detail=True, name="Add to shopping cart", methods=['POST'])
     def shopping_cart(self, request, pk=None):
         """ Adds a recipe to the shopping cart. """
         cart, _ = ShoppingCart.objects.get_or_create(user=request.user)
@@ -70,7 +70,7 @@ class RecipesViewSet(ModelViewSet):
         cart.recipes.remove(recipe)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, name="Add to favourites")
+    @action(detail=True, name="Add to favourites", methods=['POST'])
     def favorite(self, request, pk=None):
         """ Adds a recipe to favourites. """
         favourites, _ = Favourites.objects.get_or_create(user=request.user)
