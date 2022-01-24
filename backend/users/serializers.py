@@ -51,7 +51,7 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
             result = user.is_authenticated
         if result:
             result = Follow.objects.filter(user=user, author=author).exists()
-        return result
+        return result # noqa
 
 
 class SubscriptionUserSerializer(FoodgramUserSerializer):
