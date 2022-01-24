@@ -130,3 +130,8 @@ dmypy.json
 
 # .idea
 .idea
+
+# IDE
+.code-workspace
+.vscode/
+backend/media/

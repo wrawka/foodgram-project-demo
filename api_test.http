@@ -1,0 +1,55 @@
+POST http://localhost:8000/api/users/ HTTP/1.1
+content-type: application/json
+
+{
+    "username": "buttface",
+    "first_name": "butt",
+    "last_name": "face",
+    "email": "butt@face.me",
+    "password": "asstits01"
+}
+###
+POST http://127.0.0.1:8000/api/auth/token/login/ HTTP/1.1
+content-type: application/json
+
+{
+    "password": "asstits01",
+    "email": "butt@face.me"
+}
+###
+POST http://localhost:8000/api/recipes/ HTTP/1.1
+content-type: application/json
+Authorization: Token a1f0963995ec860ef964f7e40b02283c460cbd8e
+
+{
+    "ingredients": [
+        {
+            "id": 15,
+            "amount": 8
+        },
+        {
+            "id": 11,
+            "amount": 11
+        }
+    ],
+    "tags": [
+        1,
+        2
+    ],
+    "image": "image_placeholder",
+    "name": "test_recipe_name",
+    "text": "test_recipe_text",
+    "cooking_time": 99
+}
+###
+GET http://localhost:8000/api/recipes/38/ HTTP/1.1
+content-type: application/json
+###
+GET http://localhost:8000/api/users/subscriptions/?limit=1 HTTP/1.1
+content-type: application/json
+Authorization: Token a1f0963995ec860ef964f7e40b02283c460cbd8e
+
+###
+GET http://localhost:8000/api/users/ HTTP/1.1
+content-type: application/json
+Authorization: Token a1f0963995ec860ef964f7e40b02283c460cbd8e
