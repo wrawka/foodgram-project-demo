@@ -1,9 +1,7 @@
 import django_filters.rest_framework as df
-from recipes.models import Favourites, ShoppingCart
+from recipes.models import Favourites, Ingredient, Recipe, ShoppingCart
 
 from django.db.models import IntegerField, Value
-
-from .models import Ingredient, Recipe
 
 
 class IngredientSearchFilter(df.FilterSet):
@@ -23,7 +21,7 @@ class IngredientSearchFilter(df.FilterSet):
         )
         contain_queryset = (
             queryset.filter(name__icontains=value).exclude(
-                pk__in=(ingredient.pk for ingredient in start_with_queryset)
+                pk__in=start_with_queryset.values_list('pk')
             ).annotate(
                 order=Value(1, IntegerField())
             )
@@ -49,7 +47,7 @@ class RecipeFilter(df.FilterSet):
         except Favourites.DoesNotExist:
             return queryset
         return queryset.filter(
-            pk__in=(recipe.pk for recipe in favorite_recipes)
+            pk__in=favorite_recipes.values_list('pk')
         )
 
     def get_is_in_shopping_cart(self, queryset, name, value):
@@ -61,5 +59,5 @@ class RecipeFilter(df.FilterSet):
         except ShoppingCart.DoesNotExist:
             return queryset
         return queryset.filter(
-            pk__in=(recipe.pk for recipe in shopping_cart)
+            pk__in=shopping_cart.values_list('pk')
         )

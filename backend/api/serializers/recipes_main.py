@@ -10,8 +10,9 @@ from recipes.models import (
 from rest_framework import serializers
 
 from django.db import models
+from django.forms import ValidationError
 
-from users.serializers import FoodgramUserSerializer
+from .users_main import FoodgramUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -54,6 +55,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
+    cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
@@ -62,18 +64,22 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_user(self):
         return self.context['request'].user
 
-    def create(self, validated_data):
-        """ Custom create method to handle nested tags and ingredients. """
-        ingredients = validated_data.pop('recipeingredients_set')
-        tags = validated_data.pop('tags')
-        recipe = Recipe.objects.create(**validated_data)
-        recipe.tags.set(tags)
+    @staticmethod
+    def add_ingredients(recipe, ingredients):
         for ingredient in ingredients:
             RecipeIngredients.objects.create(
                 recipe=recipe,
                 ingredient=ingredient['ingredient']['id'],
                 amount=ingredient['amount']
             )
+
+    def create(self, validated_data):
+        """ Custom create method to handle nested tags and ingredients. """
+        ingredients = validated_data.pop('recipeingredients_set')
+        tags = validated_data.pop('tags')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        self.add_ingredients(recipe, ingredients)
         return recipe
 
     def update(self, recipe, validated_data):
@@ -82,13 +88,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe.tags.set(tags)
         recipe.recipeingredients_set.all().delete()
-        for ingredient in ingredients:
-            RecipeIngredients.objects.create(
-                recipe=recipe,
-                ingredient=ingredient['ingredient']['id'],
-                amount=ingredient['amount']
-            )
+        self.add_ingredients(recipe, ingredients)
         return super().update(recipe, validated_data)
+
+    def validate(self, attrs):
+        if len(attrs['recipeingredients_set']) == 0:
+            raise ValidationError('Добавьте ингредиенты.')
+        id_ingredients = []
+        for ingredient in attrs['recipeingredients_set']:
+            if ingredient['amount'] <= 0:
+                raise ValidationError(
+                    'Укажите количество ингредиента.'
+                )
+            id_ingredients.append(ingredient['ingredient']['id'])
+        if len(id_ingredients) > len(set(id_ingredients)):
+            raise ValidationError('Ингредиенты не должны повторяться.')
+        if len(attrs['tags']) > len(set(attrs['tags'])):
+            raise ValidationError('Теги не должны повторяться.')
+        if attrs['cooking_time'] <= 0:
+            raise ValidationError('Задайте время приготовления.')
+        return attrs
 
     def to_representation(self, data):
         """ Serializing tags manually. """
@@ -105,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                 favourites = user.favourites.recipes.all()
                 return recipe in favourites
             except Favourites.DoesNotExist:
-                pass
+                return False
         return False
 
     def get_is_in_shopping_cart(self, recipe):
@@ -115,5 +134,5 @@ class RecipeSerializer(serializers.ModelSerializer):
                 shopping_cart = user.shoppingcart.recipes.all()
                 return recipe in shopping_cart
             except ShoppingCart.DoesNotExist:
-                pass
+                return False
         return False
