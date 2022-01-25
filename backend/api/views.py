@@ -141,7 +141,7 @@ class RecipesViewSet(ModelViewSet):
                 {'errors': f'Not in {name}.'},
                 status=HTTP_400_BAD_REQUEST
             )
-        collection.recipes.remove(recipe)
+        collection.recipes.remove(recipe) # noqa
 
     @action(detail=True, name="Add to shopping cart", methods=['POST'])
     def shopping_cart(self, request, pk=None):
