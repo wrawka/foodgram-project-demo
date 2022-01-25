@@ -131,7 +131,7 @@ class RecipesViewSet(ModelViewSet):
         collection.recipes.add(recipe)
         return recipe
 
-    def remove_recipe(self, request, pk=None):
+    def remove_recipe(self, request, pk=None) -> None:
         """ Validates the recipe vs. collection & removes if present. """
         model_type, name = self.COLLECTIONS.get(self.action)
         recipe = get_object_or_404(Recipe, id=pk)
