@@ -38,7 +38,7 @@ class FollowViewSet(GenericViewSet):
         )
         return Response(serializer.data)
 
-    @action(detail=True)
+    @action(detail=True, methods=['POST'])
     def subscribe(self, request, pk):
         author = get_object_or_404(User, id=pk)
         if author == request.user:
