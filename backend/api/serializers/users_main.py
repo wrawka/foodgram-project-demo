@@ -1,19 +1,19 @@
 from djoser.serializers import UserCreateSerializer
-from serializers.recipes_misc import Recipe, RecipeLiteSerializer
-from rest_framework import serializers, validators
+from rest_framework.serializers import (
+    EmailField,
+    ModelSerializer,
+    SerializerMethodField,
+)
+from rest_framework.validators import UniqueValidator
 
-from django.contrib.auth import get_user_model
-
-from ...users.models import Follow
-
-
-User = get_user_model()
+from .recipes_misc import Recipe, RecipeLiteSerializer
+from users.models import Follow, User
 
 
 class FoodgramUserCreateSerializer(UserCreateSerializer):
-    email = serializers.EmailField(
+    email = EmailField(
         validators=[
-            validators.UniqueValidator(
+            UniqueValidator(
                 queryset=User.objects.all(),
                 message='Пользователь с таким email уже зарегистрирован.'
             )
@@ -33,8 +33,8 @@ class FoodgramUserCreateSerializer(UserCreateSerializer):
         }
 
 
-class FoodgramUserSerializer(serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
+class FoodgramUserSerializer(ModelSerializer):
+    is_subscribed = SerializerMethodField()
 
     class Meta:
         model = User
@@ -55,8 +55,8 @@ class FoodgramUserSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionUserSerializer(FoodgramUserSerializer):
-    recipes = serializers.SerializerMethodField()
-    recipes_count = serializers.SerializerMethodField()
+    recipes = SerializerMethodField()
+    recipes_count = SerializerMethodField()
 
     class Meta:
         model = User
