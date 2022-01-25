@@ -1,10 +1,10 @@
 from djoser.serializers import UserCreateSerializer
-from recipes.serializers.nested import Recipe, RecipeLiteSerializer
+from serializers.recipes_misc import Recipe, RecipeLiteSerializer
 from rest_framework import serializers, validators
 
 from django.contrib.auth import get_user_model
 
-from .models import Follow
+from ...users.models import Follow
 
 
 User = get_user_model()

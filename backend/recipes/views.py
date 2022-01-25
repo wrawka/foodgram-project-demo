@@ -44,12 +44,33 @@ class RecipesViewSet(ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
+
+    # def add_recipe(self, recipe, collection):
+
+
+    # def get_recipe_in_collection(self, request, pk=None):
+    #     """ Validates if recipe exist in a user-related collection and returns it. """
+    #     COLLECTIONS = {
+    #         'shopping_cart': ShoppingCart,
+    #         'favorite': Favourites
+    #     }
+    #     recipe = get_object_or_404(Recipe, id=pk)
+    #     model_type = COLLECTIONS.get(self.action)
+    #     if model_type:
+    #         collection, _ = model_type.objects.get_or_create(user=request.user)
+    #         return (
+    #             recipe, collection,
+    #             collection.recipes.filter(id__exact=recipe.id).exists())
+
+
     @action(detail=True, name="Add to shopping cart", methods=['POST'])
     def shopping_cart(self, request, pk=None):
         """ Adds a recipe to the shopping cart. """
-        cart, _ = ShoppingCart.objects.get_or_create(user=request.user)
         recipe = get_object_or_404(Recipe, id=pk)
-        if recipe in cart.recipes.all():
+        cart, _ = ShoppingCart.objects.get_or_create(user=request.user)
+
+        method = request.method
+        if cart.recipes.filter(id__exact=recipe.id).exists():
             return Response(
                 {'errors': 'Already in the shopping cart.'},
                 status=status.HTTP_400_BAD_REQUEST

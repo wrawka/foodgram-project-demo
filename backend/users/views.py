@@ -11,7 +11,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 
 from .models import Follow
-from .serializers import SubscriptionUserSerializer
+from ..api.serializers.users_main import SubscriptionUserSerializer
 
 
 User = get_user_model()

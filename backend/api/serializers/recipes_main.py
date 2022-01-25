@@ -11,7 +11,7 @@ from rest_framework import serializers
 
 from django.db import models
 
-from users.serializers import FoodgramUserSerializer
+from backend.api.serializers.users_main import FoodgramUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
