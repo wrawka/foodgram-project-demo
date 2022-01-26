@@ -3,7 +3,7 @@ from recipes.models import (
     Favourites,
     Ingredient,
     Recipe,
-    RecipeIngredients,
+    RecipeIngredient,
     ShoppingCart,
     Tag,
 )
@@ -41,7 +41,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = RecipeIngredients
+        model = RecipeIngredient
         fields = ['id', 'name', 'measurement_unit', 'amount']
 
 
@@ -50,7 +50,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
     ingredients = RecipeIngredientSerializer(
-        many=True, source='recipeingredients_set'
+        many=True, source='recipeingredient_set'
     )
     image = Base64ImageField()
     is_favorited = serializers.SerializerMethodField()
@@ -67,7 +67,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     @staticmethod
     def add_ingredients(recipe, ingredients):
         for ingredient in ingredients:
-            RecipeIngredients.objects.create(
+            RecipeIngredient.objects.create(
                 recipe=recipe,
                 ingredient=ingredient['ingredient']['id'],
                 amount=ingredient['amount']
@@ -75,7 +75,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """ Custom create method to handle nested tags and ingredients. """
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredient_set')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
@@ -84,18 +84,18 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, recipe, validated_data):
         """ Custom update method by overwriting tags and ingredients. """
-        ingredients = validated_data.pop('recipeingredients_set')
+        ingredients = validated_data.pop('recipeingredient_set')
         tags = validated_data.pop('tags')
         recipe.tags.set(tags)
-        recipe.recipeingredients_set.all().delete()
+        recipe.recipeingredient_set.all().delete()
         self.add_ingredients(recipe, ingredients)
         return super().update(recipe, validated_data)
 
     def validate(self, attrs):
-        if len(attrs['recipeingredients_set']) == 0:
+        if len(attrs['recipeingredient_set']) == 0:
             raise ValidationError('Добавьте ингредиенты.')
         id_ingredients = []
-        for ingredient in attrs['recipeingredients_set']:
+        for ingredient in attrs['recipeingredient_set']:
             if ingredient['amount'] <= 0:
                 raise ValidationError(
                     'Укажите количество ингредиента.'
