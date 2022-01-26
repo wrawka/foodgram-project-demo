@@ -135,3 +135,4 @@ dmypy.json
 .code-workspace
 .vscode/
 backend/media/
+api_test.http
