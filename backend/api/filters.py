@@ -1,5 +1,5 @@
 import django_filters.rest_framework as df
-from recipes.models import Favourites, Ingredient, Recipe, ShoppingCart
+from recipes.models import FavouritesItem, Ingredient, Recipe, ShoppingCart
 
 from django.db.models import IntegerField, Value
 
@@ -43,8 +43,8 @@ class RecipeFilter(df.FilterSet):
         if not value or not user.is_authenticated:
             return queryset
         try:
-            favorite_recipes = user.favourites.recipes.all()
-        except Favourites.DoesNotExist:
+            favorite_recipes = user.favouritesitem.recipes.all()
+        except FavouritesItem.DoesNotExist:
             return queryset
         return queryset.filter(
             pk__in=favorite_recipes.values_list('pk')

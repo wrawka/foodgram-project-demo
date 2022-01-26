@@ -1,6 +1,6 @@
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (
-    Favourites,
+    FavouritesItem,
     Ingredient,
     Recipe,
     RecipeIngredient,
@@ -121,9 +121,9 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = self.get_user()
         if user.is_authenticated:
             try:
-                favourites = user.favourites.recipes.all()
+                favourites = user.favouritesitem.recipes.all()
                 return recipe in favourites
-            except Favourites.DoesNotExist:
+            except FavouritesItem.DoesNotExist:
                 return False
         return False
 

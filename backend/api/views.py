@@ -1,5 +1,11 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Favourites, Ingredient, Recipe, ShoppingCart, Tag
+from recipes.models import (
+    FavouritesItem,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Tag,
+)
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import LimitOffsetPagination
@@ -115,7 +121,7 @@ class RecipesViewSet(ModelViewSet):
 
     COLLECTIONS = {
         'shopping_cart': (ShoppingCart, 'shopping cart'),
-        'favorite': (Favourites, 'favourites')
+        'favorite': (FavouritesItem, 'favourites')
     }
 
     def add_recipe(self, request, pk=None):

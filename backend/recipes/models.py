@@ -109,7 +109,7 @@ class ShoppingCart(models.Model):
         ]
 
 
-class Favourites(models.Model):
+class FavouritesItem(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, verbose_name='Пользователь'
     )
