@@ -1,7 +1,7 @@
 import django_filters.rest_framework as df
-from recipes.models import FavouritesItem, Ingredient, Recipe, ShoppingCart
-
 from django.db.models import IntegerField, Value
+
+from recipes.models import FavouritesItem, Ingredient, Recipe, ShoppingCart
 
 
 class IngredientSearchFilter(df.FilterSet):
