@@ -45,7 +45,7 @@ class RecipeFilter(df.FilterSet):
         try:
             favorite_recipes = user.favouritesitem.recipes.all()
         except FavouritesItem.DoesNotExist:
-            return queryset
+            return Recipe.objects.none()
         return queryset.filter(
             pk__in=favorite_recipes.values_list('pk')
         )
@@ -57,7 +57,7 @@ class RecipeFilter(df.FilterSet):
         try:
             shopping_cart = user.shoppingcart.recipes.all()
         except ShoppingCart.DoesNotExist:
-            return queryset
+            return Recipe.objects.none()
         return queryset.filter(
             pk__in=shopping_cart.values_list('pk')
         )
