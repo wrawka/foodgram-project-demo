@@ -12,7 +12,7 @@
 				"name": "Python: Django",
 				"type": "python",
 				"request": "launch",
-				"program": "${workspaceFolder}/backend/foodgram/manage.py",
+				"program": "${workspaceFolder}/backend/manage.py",
 				"args": [
 					"runserver"
 				],

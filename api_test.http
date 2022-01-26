@@ -42,10 +42,10 @@ Authorization: Token a1f0963995ec860ef964f7e40b02283c460cbd8e
     "cooking_time": 99
 }
 ###
-GET http://localhost:8000/api/recipes/38/ HTTP/1.1
+GET http://localhost:8000/api/recipes/39/ HTTP/1.1
 content-type: application/json
 ###
-GET http://localhost:8000/api/users/subscriptions/?limit=1 HTTP/1.1
+POST http://localhost:8000/api/recipes/39/favorite/ HTTP/1.1
 content-type: application/json
 Authorization: Token a1f0963995ec860ef964f7e40b02283c460cbd8e
 
