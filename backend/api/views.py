@@ -120,7 +120,9 @@ class RecipesViewSet(ModelViewSet):
 
     COLLECTIONS = {
         'shopping_cart': (ShoppingCart, 'shopping cart'),
-        'favorite': (FavouritesItem, 'favourites')
+        'remove_from_shopping_cart': (ShoppingCart, 'shopping cart'),
+        'favorite': (FavouritesItem, 'favourites'),
+        'remove_from_favourites': (FavouritesItem, 'favourites')
     }
 
     def add_recipe(self, request, pk=None):
@@ -146,7 +148,8 @@ class RecipesViewSet(ModelViewSet):
                 {'errors': f'Not in {name}.'},
                 status=HTTP_400_BAD_REQUEST
             )
-        collection.recipes.remove(recipe) # noqa
+        collection.recipes.remove(recipe)
+        return Response(status=HTTP_204_NO_CONTENT)
 
     @action(detail=True, name="Add to shopping cart", methods=['POST'])
     def shopping_cart(self, request, pk=None):
@@ -157,8 +160,7 @@ class RecipesViewSet(ModelViewSet):
     @shopping_cart.mapping.delete
     def remove_from_shopping_cart(self, request, pk=None):
         """ Removes a recipe from the shopping cart. """
-        self.remove_recipe(request, pk=pk)
-        return Response(status=HTTP_204_NO_CONTENT)
+        return self.remove_recipe(request, pk=pk)
 
     @action(detail=True, name="Add to favourites", methods=['POST'])
     def favorite(self, request, pk=None):
@@ -181,7 +183,7 @@ class RecipesViewSet(ModelViewSet):
         ingredients = (
             recipes.order_by('ingredients__name')
             .values('ingredients__name', 'ingredients__measurement_unit')
-            .annotate(total=Sum('recipeingredients__amount'))
+            .annotate(total=Sum('recipeingredient__amount'))
         )
         ingredients_list = ''
         for ingredient in ingredients:
