@@ -8,7 +8,6 @@ from recipes.models import (
 )
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -28,6 +27,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from .filters import IngredientSearchFilter, RecipeFilter
+from .pagination import FoodgramPagination
 from .serializers.recipes_main import (
     IngredientSerializer,
     RecipeSerializer,
@@ -43,7 +43,7 @@ class FollowViewSet(GenericViewSet):
     permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ['author__username', 'user__username']
-    pagination_class = LimitOffsetPagination
+    pagination_class = FoodgramPagination
 
     @action(detail=False)
     def subscriptions(self, request):
@@ -108,7 +108,7 @@ class IngredientsViewSet(ReadOnlyModelViewSet):
 class RecipesViewSet(ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = LimitOffsetPagination
+    pagination_class = FoodgramPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
