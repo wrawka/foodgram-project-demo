@@ -1,4 +1,8 @@
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from django.db import models
+from django.forms import ValidationError
+
 from recipes.models import (
     FavouritesItem,
     Ingredient,
@@ -7,11 +11,6 @@ from recipes.models import (
     ShoppingCart,
     Tag,
 )
-from rest_framework import serializers
-
-from django.db import models
-from django.forms import ValidationError
-
 from .users_main import FoodgramUserSerializer
 
 
